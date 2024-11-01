@@ -1,0 +1,39 @@
+services:
+  maxim-vms-ui-dev:
+    container_name: maxim-vms-ui-${NODE_ENV}
+    restart: always
+    build:
+      context: .
+      args:
+        CONFIGURATION: development
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:80"
+    profiles:
+      - development
+
+  maxim-vms-ui-qa:
+    container_name: maxim-vms-ui-${NODE_ENV}
+    restart: always
+    build:
+      context: .
+      args:
+        CONFIGURATION: qa
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:80"
+    profiles:
+      - qa
+
+  maxim-vms-ui-production:
+    container_name: maxim-vms-ui-${NODE_ENV}
+    restart: always
+    build:
+      context: .
+      args:
+        CONFIGURATION: production
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:80"
+    profiles:
+      - production

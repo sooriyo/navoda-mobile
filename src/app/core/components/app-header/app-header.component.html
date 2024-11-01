@@ -1,0 +1,48 @@
+<nav class="bg-white shadow-md overflow-auto">
+  <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="h-16 flex justify-between items-center">
+      <div>
+        @if (permissionFlags.flags.canCreateVisitor()) {
+          <button class="whitespace-nowrap button-blue" [routerLink]="['visitor-create']">
+          Add Visitor
+        </button>
+        }
+      </div>
+      <!-- Desktop menu - hidden on mobile -->
+      <div class="hidden md:flex items-center space-x-4">
+        @for (button of filteredButtons(); track button.key) {
+          <button
+            class="nav-button px-3 py-2 whitespace-nowrap"
+            [ngClass]="{'bg-gray-100': activeButton === button.key}"
+            (click)="navigate(button.status)">
+            {{ button.label }}
+          </button>
+        }
+      </div>
+      <div class="md:hidden ">
+        <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="button-gray px-5 py-2.5 text-center inline-flex items-center " type="button">
+          {{ selectedLabel }} <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+        </svg>
+        </button>
+        <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+          <ul class="py-2 text-sm text-gray-700 text-center" aria-labelledby="dropdownDefaultButton">
+            @for (button of filteredButtons(); track button.key) {
+              <li
+                class="nav-button px-3 py-2 whitespace-nowrap hover:bg-gray-100 cursor-pointer"
+                [ngClass]="{'bg-gray-100': activeButton === button.key}"
+                (click)="navigate(button.status)">
+                {{ button.label }}
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+      <div>
+        <button type="button" class="button-blue" (click)="logout()">
+          Exit
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

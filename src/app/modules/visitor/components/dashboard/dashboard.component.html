@@ -1,0 +1,170 @@
+<div class="container mx-auto px-4 py-6 max-w-lg">
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <form #saleForm="ngForm" class="space-y-4">
+            <div class="relative">
+                <select
+                        [(ngModel)]="selectedProduct"
+                        name="product"
+                        (change)="onProductChange()"
+                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option value="">Shop 1</option>
+                    <option value="">Shop 2</option>
+                    <option value="">Shop 3</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">New Sale</h2>
+        <form (ngSubmit)="addToCart()" #saleForm="ngForm" class="space-y-4">
+            <div class="relative">
+                <select
+                        [(ngModel)]="selectedProduct"
+                        name="product"
+                        (change)="onProductChange()"
+                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option value="">Select Product</option>
+                    <option *ngFor="let product of products" [value]="product.name">
+                        {{ product.name }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Size Dropdown -->
+            <div class="relative" *ngIf="selectedProduct">
+                <select
+                        [(ngModel)]="selectedSize"
+                        name="size"
+                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option value="">Select Size (kg)</option>
+                    <option *ngFor="let size of getProductSizes()" [value]="size">
+                        {{ size }}kg
+                    </option>
+                </select>
+            </div>
+
+            <!-- Quantity Input -->
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <input
+                            type="number"
+                            [(ngModel)]="quantity"
+                            name="quantity"
+                            min="1"
+                            class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Quantity">
+                </div>
+
+                <button
+                        type="submit"
+                        [disabled]="!selectedProduct || !selectedSize || !quantity"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
+                    <span class="hidden sm:inline">Add to Cart</span>
+                    <span class="text-xl">+</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Cart Section -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6" *ngIf="cart.length > 0">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Current Order</h2>
+
+        <!-- Cart Items Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase"></th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let item of cart">
+                    <td class="px-4 py-3 text-sm">{{ item.product }}</td>
+                    <td class="px-4 py-3 text-sm">{{ item.size }}kg</td>
+                    <td class="px-4 py-3 text-sm">{{ item.quantity }}</td>
+                    <td class="px-4 py-3 text-sm">{{ item.price | currency }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <button
+                                (click)="removeFromCart(item)"
+                                class="text-red-600 hover:text-red-800">
+                            ✕
+                        </button>
+                    </td>
+                </tr>
+                <tr class="bg-gray-50">
+                    <td colspan="3" class="px-4 py-3 text-sm font-semibold">Total</td>
+                    <td colspan="2" class="px-4 py-3 text-sm font-semibold">
+                        {{ getCartTotal() | currency }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cart Actions -->
+        <div class="flex gap-2 mt-4">
+            <button
+                    (click)="completeOrder()"
+                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Complete Order
+            </button>
+            <button
+                    (click)="clearCart()"
+                    class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Unpaid Orders Section -->
+    <div class="bg-white rounded-lg shadow-md p-4" *ngIf="orders.length > 0">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Unpaid Orders</h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order No</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let order of orders">
+                    <td class="px-4 py-3 text-sm">{{ order.orderNo }}</td>
+                    <td class="px-4 py-3 text-sm">{{ order.amount | currency }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <button
+                                (click)="markOrderAsPaid(order)"
+                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
+                            Pay
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 max-w-lg">
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <h6 class="text-sm font-bold pb-4">Unpaid Orders</h6>
+        <table class="table">
+            <thead class="table-thead">
+            <tr class="whitespace-nowrap">
+                <th scope="col" class="px-6 py-3">Order No</th>
+                <th scope="col" class="px-6 py-3">Amount</th>
+                <th scope="col" class="px-6 py-3">Action</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+

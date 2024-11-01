@@ -1,0 +1,57 @@
+pipelines:
+  pull-requests:
+    "**":
+      - step:
+          name: Build
+          runs-on:
+            - "self.hosted"
+            - "linux.shell"
+            - "maxim.ecs.web.01"
+          script:
+            - docker build -f Dockerfile.build -t $BITBUCKET_REPO_SLUG:$BITBUCKET_PR_ID .
+            - docker run --rm -v $(pwd)/build:/app/build $BITBUCKET_REPO_SLUG:$BITBUCKET_PR_ID
+      - step:
+          name: Cleanup
+          runs-on:
+            - "self.hosted"
+            - "linux.shell"
+            - "maxim.ecs.web.01"
+          script:
+            - docker rmi $BITBUCKET_REPO_SLUG:$BITBUCKET_PR_ID
+
+  branches:
+    "release/dev":
+      - step:
+          name: Deploy
+          deployment: Development
+          runs-on:
+            - "self.hosted"
+            - "linux.shell"
+            - "maxim.ecs.web.01"
+          script:
+            - docker compose down
+            - docker compose --profile development up --build -d
+
+    "release/qa":
+      - step:
+          name: Deploy
+          deployment: Staging
+          runs-on:
+            - "self.hosted"
+            - "linux.shell"
+            - "maxim.ecs.web.01"
+          script:
+            - docker compose down
+            - docker compose --profile qa up --build -d
+
+    "master":
+      - step:
+          name: Deploy
+          deployment: Production
+          runs-on:
+            - "self.hosted"
+            - "linux.shell"
+            - "maxim.ecs.web.01"
+          script:
+            - docker compose down
+            - docker compose --profile production up --build -d
