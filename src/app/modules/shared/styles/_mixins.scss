@@ -1,7 +1,7 @@
 // Base styles for form elements
 @mixin common (){
   .main {
-    @apply bg-white rounded-lg mx-6 mt-4 p-4;
+    @apply bg-white shadow-sm rounded-lg mx-6 mt-4 p-4;
   }
   .label {
     @apply absolute text-sm text-gray-600 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 peer-focus:px-2 peer-placeholder-shown:scale-100
@@ -46,7 +46,7 @@
 
 // Button styles
 %button-base {
-  @apply px-3 py-2 text-sm font-medium text-center rounded-lg focus:outline-none focus:ring-4 transition duration-300;
+  @apply px-3 py-2.5 text-sm font-medium text-center rounded-lg focus:outline-none focus:ring-4 transition duration-300;
 }
 @mixin button-blue {
   @extend %button-base;

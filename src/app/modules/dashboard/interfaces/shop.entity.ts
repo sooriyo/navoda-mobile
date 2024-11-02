@@ -1,7 +1,7 @@
 export interface ShopDTO{
     id:  number
     area:  string
-    fullName?: string
+    fullName: string
     shopCode: string
     routeName?: string
     shortName?: string
@@ -42,4 +42,21 @@ export interface ProductVariantDTO {
     weight: number;
     productName: string;
     productVariantId: number;
+}
+
+
+export interface CartItem {
+    productId: number;
+    productName: string;
+    variantId: number;
+    weight: number;
+    quantity: number;
+    price: number;
+    total: number;
+}
+
+export interface Cart {
+    items: CartItem[];
+    total: number;
+    paymentMethod?: 'cash' | 'credit';
 }

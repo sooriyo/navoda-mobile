@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  API_BASE: 'https://api.vms.maximimpressions.com',
+  API_BASE: 'https://api.navoda.fusion.lumiraq.com',
   PORTAL: 'https://portal.maximimpressions.com',
 
   cache: {
