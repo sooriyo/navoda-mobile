@@ -7,6 +7,8 @@ import { ProductService } from "../../services/product.service";
 import { RouteDTO } from "../../interfaces/route.entity";
 import { Subject, catchError, takeUntil, forkJoin, finalize, Observable, of } from 'rxjs';
 import {
+    INITIAL_PAGE,
+    ITEMS_PER_PAGE,
     PaginationData,
     ProductSearchParams,
     RouteSearchParams,
@@ -30,20 +32,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly notification = inject(NotificationService);
     private readonly loading = inject(LoadingService);
 
+    protected readonly localStorage = localStorage;
+
+    selectedRouteName: string | undefined;
+
     routeDTO: RouteDTO[] = [];
     shopDTO: ShopDTO[] = [];
     productDTO: ProductDTO[] = [];
+
     pagination: PaginationData = {
         totalItems: 0,
         pageNumber: 1,
         itemsPerPage: 10
     };
 
-    searchParams: RouteSearchParams = {
-        items_per_page: '10',
-        page_number: '1',
+    routeSearchParams: RouteSearchParams = {
         route_name: '',
         area_name: '',
+        items_per_page: ITEMS_PER_PAGE,
+        page_number: INITIAL_PAGE,
     };
 
     productSearchParams: ProductSearchParams = {
@@ -51,18 +58,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         base_price: '',
         cost: '',
         warehouse_code: '',
-        items_per_page: '10',
-        page_number: '1'
+        items_per_page: ITEMS_PER_PAGE,
+        page_number: INITIAL_PAGE
     };
 
     shopSearchParams: ShopSearchParams = {
         shop_code: '',
         short_name: '',
         full_name: '',
-        route_name: '',
+        route_name: localStorage.getItem('selectedRouteName') || '',
         warehouse_code: '',
-        items_per_page: '10',
-        page_number: '1'
+        items_per_page: ITEMS_PER_PAGE,
+        page_number: INITIAL_PAGE
     };
 
     private handleError(message: string): (error: any) => Observable<never> {
@@ -88,7 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private fetchRoute(): Observable<any> {
-        return this.routeService.find(this.searchParams, true).pipe(
+        return this.routeService.find(this.routeSearchParams, true).pipe(
             catchError(this.handleError('Failed to fetch route'))
         );
     }
@@ -142,4 +149,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.destroy$.next();
         this.destroy$.complete();
     }
+
+
+    // Set Route to localStorage
+    onRouteChange(event: Event): void {
+        const selectElement = event.target as HTMLSelectElement;
+        const selectedRouteId = selectElement.value;
+        const selectedRoute = this.routeDTO.find(route => route.name === selectedRouteId);
+
+        if (selectedRoute) {
+            this.selectedRouteName = selectedRoute.name;
+            localStorage.setItem('selectedRouteName', this.selectedRouteName);
+        }
+    }
+
 }

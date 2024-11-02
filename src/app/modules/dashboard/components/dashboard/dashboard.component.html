@@ -1,27 +1,30 @@
+@if(localStorage.getItem('selectedRouteName') == null || undefined ) {
 <div class="container mx-auto px-4 py-6 max-w-lg">
     <!-- Route Selection -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <div class="relative">
-            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                    (change)="onRouteChange($event)"
+            >
                 <option hidden>Select Route</option>
                 @for (route of routeDTO; track route.id) {
-                    <option [value]="route.id">{{ route.name.toUpperCase() }}</option>
-                } @empty {
-                    <option hidden disabled>No Routes available</option>
+                    <option [value]="route.name">{{ route.name.toUpperCase() }}</option>
                 }
             </select>
         </div>
     </div>
+</div>
+}
 
+<div class="container mx-auto px-4 py-6 max-w-lg">
     <!-- Shop Selection -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <div class="relative">
             <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
                 <option>Select Shop</option>
                 @for (shop of shopDTO; track shop.id) {
-                    <option [value]="shop.id">{{ shop.shopCode}} - {{ shop.shortName}}</option>
-                } @empty {
-                    <option hidden disabled>No shops available</option>
+                    <option [value]="shop.id">{{ shop.shopCode }} - {{ shop.shortName || shop.fullName }}
+                    </option>
                 }
             </select>
         </div>
@@ -55,9 +58,12 @@
             <!-- Quantity & Add to Cart -->
             <div class="flex gap-2">
                 <div class="relative flex-1">
-                    <input type="number" min="1" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Quantity">
+                    <input type="number" min="1"
+                           class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                           placeholder="Quantity">
                 </div>
-                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
+                <button type="button"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
                     <span class="hidden sm:inline">Add to Cart</span>
                     <span class="text-xl">+</span>
                 </button>
