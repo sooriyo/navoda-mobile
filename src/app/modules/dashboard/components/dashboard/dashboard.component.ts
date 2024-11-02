@@ -6,7 +6,14 @@ import { ProductDTO } from "../../interfaces/product.entity";
 import { ProductService } from "../../services/product.service";
 import { RouteDTO } from "../../interfaces/route.entity";
 import { Subject, catchError, takeUntil, forkJoin, finalize, Observable, of } from 'rxjs';
-import {PaginationData, ProductSearchParams, RouteSearchParams} from "../../interfaces/searchParams.entity";
+import {
+    PaginationData,
+    ProductSearchParams,
+    RouteSearchParams,
+    ShopSearchParams
+} from "../../../shared/interface/searchParams.entity";
+import {ShopService} from "../../services/shop.service";
+import {ShopDTO} from "../../interfaces/shop.entity";
 
 @Component({
     selector: 'app-dashboard',
@@ -19,10 +26,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly destroy$ = new Subject<void>();
     private readonly routeService = inject(RouteService);
     private readonly productService = inject(ProductService);
+    private readonly shopService = inject(ShopService);
     private readonly notification = inject(NotificationService);
     private readonly loading = inject(LoadingService);
 
     routeDTO: RouteDTO[] = [];
+    shopDTO: ShopDTO[] = [];
     productDTO: ProductDTO[] = [];
     pagination: PaginationData = {
         totalItems: 0,
@@ -41,6 +50,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         product_name: '',
         base_price: '',
         cost: '',
+        warehouse_code: '',
+        items_per_page: '10',
+        page_number: '1'
+    };
+
+    shopSearchParams: ShopSearchParams = {
+        shop_code: '',
+        short_name: '',
+        full_name: '',
+        route_name: '',
         warehouse_code: '',
         items_per_page: '10',
         page_number: '1'
@@ -74,6 +93,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         );
     }
 
+    private fetchShops(): Observable<any> {
+        return this.shopService.find(this.shopSearchParams, true).pipe(
+            catchError(this.handleError('Failed to fetch Shops'))
+        );
+    }
+
     private fetchProduct(): Observable<any> {
         return this.productService.find(this.productSearchParams, true).pipe(
             catchError(this.handleError('Failed to fetch products'))
@@ -85,15 +110,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         forkJoin({
             routes: this.fetchRoute(),
-            products: this.fetchProduct()
+            products: this.fetchProduct(),
+            shops: this.fetchShops()
+
         }).pipe(
             takeUntil(this.destroy$),
             finalize(() => this.loading.setLoading(false))
         ).subscribe({
-            next: ({ routes, products }) => {
+            next: ({ routes, shops, products }) => {
                 if (routes?.data) {
                     this.routeDTO = routes.data.data ?? [];
                     this.updatePaginationData(routes);
+                }
+
+                if (shops?.data) {
+                    this.shopDTO = shops.data.data ?? [];
                 }
 
                 if (products?.data) {

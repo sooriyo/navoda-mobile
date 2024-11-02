@@ -1,1 +1,1 @@
-export * from './visitor'
+export * from './dashboard'

@@ -16,6 +16,14 @@ export interface ProductSearchParams extends SearchParams {
     warehouse_code: string;
 }
 
+export interface ShopSearchParams extends SearchParams {
+    shop_code: string;
+    short_name: string;
+    full_name: string;
+    route_name: string;
+
+}
+
 export interface PaginationData {
     totalItems: number;
     pageNumber: number;

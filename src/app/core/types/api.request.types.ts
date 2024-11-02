@@ -1,11 +1,11 @@
 import {APIRequestResources} from "../enums"
 
 export type APIRequestResource =
-  APIRequestResources.AuthService |
-  APIRequestResources.RouteService|
-  APIRequestResources.EmployeeService|
-  APIRequestResources.ProductService
-
+    APIRequestResources.AuthService |
+    APIRequestResources.RouteService |
+    APIRequestResources.EmployeeService |
+    APIRequestResources.ProductService |
+    APIRequestResources.ShopService
 
 
 export type APIRequestMethod = 'delete' | 'get' | 'post' | 'put'
