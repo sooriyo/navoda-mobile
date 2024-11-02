@@ -1,30 +1,31 @@
-@if(localStorage.getItem('selectedRouteName') == null || undefined ) {
-<div class="container mx-auto px-4 py-6 max-w-lg">
-    <!-- Route Selection -->
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div class="relative">
-            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
-                    (change)="onRouteChange($event)"
-            >
-                <option hidden>Select Route</option>
-                @for (route of routeDTO; track route.id) {
-                    <option [value]="route.name">{{ route.name.toUpperCase() }}</option>
-                }
-            </select>
+@if (isRouteSelected) {
+    <div class="container mx-auto px-4 py-6 max-w-lg">
+        <!-- Route Selection -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div class="relative">
+                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none"
+                        (change)="onRouteChange($event)"
+                >
+                    <option hidden>Select Route</option>
+                    @for (route of routeDTO; track route.id) {
+                        <option [value]="route.name">{{ route.name.toUpperCase() }}</option>
+                    }
+                </select>
+            </div>
         </div>
     </div>
-</div>
 }
 
 <div class="container mx-auto px-4 py-6 max-w-lg">
     <!-- Shop Selection -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <div class="relative">
-            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                <option>Select Shop</option>
+            <select
+                    (change)="handleShopChange($event)"
+                    class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                <option hidden>Select Shop</option>
                 @for (shop of shopDTO; track shop.id) {
-                    <option [value]="shop.id">{{ shop.shopCode }} - {{ shop.shortName || shop.fullName }}
-                    </option>
+                    <option [value]="shop.id">{{ shop.shopCode }} - {{ shop.shortName || shop.fullName }}</option>
                 }
             </select>
         </div>
@@ -34,25 +35,43 @@
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">New Sale</h2>
         <form class="space-y-4">
+
             <div class="relative">
-                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option hidden="">Select Product</option>
-                    @for (product of productDTO; track product.id) {
-                        <option [value]="product.id">{{ product.name.toUpperCase() }}</option>
-                    } @empty {
-                        <option hidden disabled>No Routes available</option>
+                <select
+                        (change)="handleProductChange($event)"
+                        [disabled]="!$$shopData() || $$isLoading()"
+                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option hidden value="">Select Product</option>
+                    @if ($$isLoading()) {<option disabled>Loading products...</option>
+                    } @else if ($$shopData()?.products?.length) {
+                        @for (product of $$shopData()?.products; track product.productId) {
+                            <option [value]="product.productId">
+                                {{ product.productName.toUpperCase() }}
+                            </option>
+                        }
+                    } @else {
+                        <option disabled>No products available</option>
                     }
                 </select>
             </div>
 
-            <!-- Size Dropdown -->
-            <div class="relative">
-                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option>Select Size (kg)</option>
-                    <option>1kg</option>
-                    <option>2kg</option>
-                    <option>3kg</option>
-                </select>
+            <!-- Size/Variant Selection -->
+                <div class="relative">
+                    <select
+                            (change)="handleVariantChange($event)"
+                            [disabled]="!$$selectedProduct()"
+                            class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                        <option hidden value="">Select Size</option>
+                        @if ($$selectedProduct()?.productVariants?.length) {
+                            @for (variant of $$selectedProduct()?.productVariants; track variant.productVariantId) {
+                                <option [value]="variant.productVariantId">
+                                    {{ variant.weight }}kg - Rs.{{ variant.price }}
+                                </option>
+                            }
+                        } @else {
+                            <option disabled>No variants available</option>
+                        }
+                    </select>
             </div>
 
             <!-- Quantity & Add to Cart -->
@@ -64,8 +83,7 @@
                 </div>
                 <button type="button"
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
-                    <span class="hidden sm:inline">Add to Cart</span>
-                    <span class="text-xl">+</span>
+                    <span class="hidden sm:inline">Add to Order</span>
                 </button>
             </div>
         </form>

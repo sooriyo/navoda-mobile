@@ -6,3 +6,40 @@ export interface ShopDTO{
     routeName?: string
     shortName?: string
 }
+
+export interface ShopDataDTO {
+    shopId: number;
+    shopCode: string;
+    fullName: string;
+    shopName: string;
+    address: string;
+    mobile: string;
+    routeId: number;
+    status: string;
+    products: ShopProductDTO[];
+}
+
+export interface ShopProductDTO {
+    unit: string;
+    productId: number;
+    shopPrices: ShopPriceDTO[];
+    productCost: number;
+    productName: string;
+    warehouseId: number;
+    productVariants: ProductVariantDTO[];
+    productBasePrice: number;
+    productDescription: string;
+}
+
+export interface ShopPriceDTO {
+    price: number;
+    productId: number;
+    shopPriceId: number;
+}
+
+export interface ProductVariantDTO {
+    price: number;
+    weight: number;
+    productName: string;
+    productVariantId: number;
+}

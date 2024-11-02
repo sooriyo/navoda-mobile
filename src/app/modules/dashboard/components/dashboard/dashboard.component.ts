@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import {Component, inject, OnInit, OnDestroy, effect, signal} from '@angular/core';
 import { FormsModule } from "@angular/forms";
 import { LoadingService, NotificationService } from "../../../../core";
 import { RouteService } from "../../services/route.service";
 import { ProductDTO } from "../../interfaces/product.entity";
 import { ProductService } from "../../services/product.service";
 import { RouteDTO } from "../../interfaces/route.entity";
+import { Storage } from '@capacitor/storage';
 import { Subject, catchError, takeUntil, forkJoin, finalize, Observable, of } from 'rxjs';
 import {
     INITIAL_PAGE,
@@ -15,7 +16,7 @@ import {
     ShopSearchParams
 } from "../../../shared/interface/searchParams.entity";
 import {ShopService} from "../../services/shop.service";
-import {ShopDTO} from "../../interfaces/shop.entity";
+import {ShopDataDTO, ShopDTO, ShopProductDTO} from "../../interfaces/shop.entity";
 
 @Component({
     selector: 'app-dashboard',
@@ -27,18 +28,22 @@ import {ShopDTO} from "../../interfaces/shop.entity";
 export class DashboardComponent implements OnInit, OnDestroy {
     private readonly destroy$ = new Subject<void>();
     private readonly routeService = inject(RouteService);
-    private readonly productService = inject(ProductService);
     private readonly shopService = inject(ShopService);
     private readonly notification = inject(NotificationService);
     private readonly loading = inject(LoadingService);
 
-    protected readonly localStorage = localStorage;
+    isRouteSelected: boolean = false;
+    $$selectedShop = signal<number | null>(null);
+    $$shopData = signal<ShopDataDTO | null>(null);
+    $$isLoading = signal(false);
+    $$selectedProduct = signal<ShopProductDTO | null>(null);
 
     selectedRouteName: string | undefined;
 
     routeDTO: RouteDTO[] = [];
     shopDTO: ShopDTO[] = [];
-    productDTO: ProductDTO[] = [];
+    productDTO: ShopProductDTO[] = [];
+
 
     pagination: PaginationData = {
         totalItems: 0,
@@ -72,6 +77,54 @@ export class DashboardComponent implements OnInit, OnDestroy {
         page_number: INITIAL_PAGE
     };
 
+    constructor() {
+        effect(() => {
+                const shop = this.shopService.active()
+                if (shop) {
+                    this.$$selectedShop.set(shop.shopId || 0);
+                }
+            }, {allowSignalWrites: true}
+        );
+    }
+
+    handleShopChange(event: Event) {
+        const shopId = (event.target as HTMLSelectElement).value;
+        if (shopId) {
+            this.$$selectedShop.set(Number(shopId));
+            this.$$selectedProduct.set(null);
+            this.$$isLoading.set(true);
+
+            this.shopService.getById(String(this.$$selectedShop()), true).subscribe({
+                next: (response) => {
+                    this.$$shopData.set(response.data);
+                    this.$$isLoading.set(false);
+                },
+                error: () => {
+                    this.$$isLoading.set(false);
+                }
+            });
+        }
+    }
+
+
+    handleVariantChange(event: Event) {
+        const variantId = Number((event.target as HTMLSelectElement).value);
+        if (variantId && this.$$selectedProduct()) {
+            const selectedVariant = this.$$selectedProduct()?.productVariants.find(
+                v => v.productVariantId === variantId
+            );
+        }
+    }
+
+    handleProductChange(event: Event) {
+        const productId = Number((event.target as HTMLSelectElement).value);
+        if (productId && this.$$shopData()) {
+            const product = this.$$shopData()?.products.find(p => p.productId === productId);
+            this.$$selectedProduct.set(product || null);
+        } else {
+            this.$$selectedProduct.set(null);
+        }
+    }
     private handleError(message: string): (error: any) => Observable<never> {
         return (error: any) => {
             console.error(error);
@@ -106,25 +159,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         );
     }
 
-    private fetchProduct(): Observable<any> {
-        return this.productService.find(this.productSearchParams, true).pipe(
-            catchError(this.handleError('Failed to fetch products'))
-        );
-    }
-
     private loadData(): void {
         this.loading.setLoading(true);
 
         forkJoin({
             routes: this.fetchRoute(),
-            products: this.fetchProduct(),
             shops: this.fetchShops()
 
         }).pipe(
             takeUntil(this.destroy$),
             finalize(() => this.loading.setLoading(false))
         ).subscribe({
-            next: ({ routes, shops, products }) => {
+            next: ({ routes, shops }) => {
                 if (routes?.data) {
                     this.routeDTO = routes.data.data ?? [];
                     this.updatePaginationData(routes);
@@ -134,15 +180,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this.shopDTO = shops.data.data ?? [];
                 }
 
-                if (products?.data) {
-                    this.productDTO = products.data.data ?? [];
-                }
             }
         });
     }
 
-    ngOnInit(): void {
+    async ngOnInit() {
         this.loadData();
+        await this.checkStoredRoute();
     }
 
     ngOnDestroy(): void {
@@ -150,17 +194,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-
-    // Set Route to localStorage
-    onRouteChange(event: Event): void {
+    // Set Route to capacitor storage and check availability
+    async onRouteChange(event: Event): Promise<void> {
         const selectElement = event.target as HTMLSelectElement;
         const selectedRouteId = selectElement.value;
         const selectedRoute = this.routeDTO.find(route => route.name === selectedRouteId);
 
         if (selectedRoute) {
             this.selectedRouteName = selectedRoute.name;
-            localStorage.setItem('selectedRouteName', this.selectedRouteName);
+            try {
+                await Storage.set({
+                    key: 'selectedRouteName',
+                    value: this.selectedRouteName
+                });
+                this.isRouteSelected = false;
+            } catch (error) {
+            }
         }
     }
 
+    async checkStoredRoute() {
+        try {
+            const { value } = await Storage.get({ key: 'selectedRouteName' });
+            this.isRouteSelected = !value;
+        } catch (error) {
+            this.isRouteSelected = true;
+        }
+    }
 }
