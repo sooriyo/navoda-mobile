@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "maxim-vms-ui": {
+    "navoda": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -65,7 +65,7 @@
           },
           "defaultConfiguration": "production",
           "options": {
-            "outputPath": "dist/maxim-vms-ui",
+            "outputPath": "dist/navoda",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -88,10 +88,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "maxim-vms-ui:build:production"
+              "buildTarget": "navoda:build:production"
             },
             "development": {
-              "buildTarget": "maxim-vms-ui:build:development"
+              "buildTarget": "navoda:build:development"
             }
           },
           "defaultConfiguration": "development"
