@@ -22,7 +22,7 @@ export class VisitorService extends CachedAPIRequest {
   active = toSignal(this.$active, {initialValue: undefined});
 
   constructor(protected override http: HttpClient, private router: Router) {
-    super(http, APIRequestResources.VisitorService)
+    super(http, APIRequestResources.ProductService)
     // this.getCategories().pipe(take(1)).subscribe()
   }
 

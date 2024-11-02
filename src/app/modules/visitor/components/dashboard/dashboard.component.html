@@ -1,65 +1,290 @@
+<!--&lt;!&ndash; dashboard.component.html &ndash;&gt;-->
+<!--<div class="container mx-auto px-4 py-6 max-w-lg">-->
+<!--    &lt;!&ndash; Route Selection &ndash;&gt;-->
+<!--    <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--        <div class="relative">-->
+<!--            <select-->
+<!--                    [(ngModel)]="selectedRoute"-->
+<!--                    (change)="onRouteChange()"-->
+<!--                    class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">-->
+<!--                <option [ngValue]="null">Select Route</option>-->
+<!--                <option *ngFor="let route of getRoutes()" [ngValue]="route">-->
+<!--                    {{ route.unitName }}-->
+<!--                </option>-->
+<!--            </select>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Shop Selection &ndash;&gt;-->
+<!--    @if (selectedRoute) {-->
+<!--        <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--            <div class="relative">-->
+<!--                <select-->
+<!--                        [(ngModel)]="selectedShop"-->
+<!--                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">-->
+<!--                    <option [ngValue]="null">Select Shop</option>-->
+<!--                    <option *ngFor="let shop of getShopsByRoute(selectedRoute)" [ngValue]="shop">-->
+<!--                        {{ shop.unitName }}-->
+<!--                    </option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    }-->
+
+<!--    &lt;!&ndash; New Sale &ndash;&gt;-->
+<!--    @if (selectedShop) {-->
+<!--        <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--            <h2 class="text-lg font-semibold text-gray-800 mb-4">New Sale</h2>-->
+<!--            <form class="space-y-4">-->
+<!--                &lt;!&ndash; Product Selection &ndash;&gt;-->
+<!--                <div class="relative">-->
+<!--                    <select-->
+<!--                            [(ngModel)]="selectedProduct"-->
+<!--                            name="product"-->
+<!--                            (change)="onProductChange()"-->
+<!--                            class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">-->
+<!--                        <option value="">Select Product</option>-->
+<!--                        <option *ngFor="let product of products" [value]="product.name">-->
+<!--                            {{ product.name }}-->
+<!--                        </option>-->
+<!--                    </select>-->
+<!--                </div>-->
+
+<!--                &lt;!&ndash; Size Dropdown &ndash;&gt;-->
+<!--                @if (selectedProduct) {-->
+<!--                    <div class="relative">-->
+<!--                        <select-->
+<!--                                [(ngModel)]="selectedSize"-->
+<!--                                name="size"-->
+<!--                                class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">-->
+<!--                            <option value="">Select Size (kg)</option>-->
+<!--                            <option *ngFor="let size of getProductSizes()" [value]="size">-->
+<!--                                {{ size }}kg-->
+<!--                            </option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                }-->
+
+<!--                &lt;!&ndash; Quantity & Add to Cart &ndash;&gt;-->
+<!--                <div class="flex gap-2">-->
+<!--                    <div class="relative flex-1">-->
+<!--                        <input-->
+<!--                                type="number"-->
+<!--                                [(ngModel)]="quantity"-->
+<!--                                name="quantity"-->
+<!--                                min="1"-->
+<!--                                class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"-->
+<!--                                placeholder="Quantity">-->
+<!--                    </div>-->
+
+<!--                    <button-->
+<!--                            type="button"-->
+<!--                            (click)="addToCart()"-->
+<!--                            [disabled]="!selectedProduct || !selectedSize || quantity < 1"-->
+<!--                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">-->
+<!--                        <span class="hidden sm:inline">Add to Cart</span>-->
+<!--                        <span class="text-xl">+</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    }-->
+
+<!--    &lt;!&ndash; Cart Section &ndash;&gt;-->
+<!--    @if (cart.length > 0) {-->
+<!--        <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--            <h2 class="text-lg font-semibold text-gray-800 mb-4">Current Order</h2>-->
+
+<!--            <table class="w-full min-w-full divide-y divide-gray-200">-->
+<!--                <thead class="bg-gray-50">-->
+<!--                <tr>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>-->
+<!--                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase"></th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody class="bg-white divide-y divide-gray-200">-->
+<!--                    @for (item of cart; track item.id) {-->
+<!--                        <tr>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ item.product }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ item.size }}kg</td>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ item.quantity }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ item.price | currency }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm">-->
+<!--                                <button-->
+<!--                                        (click)="removeFromCart(item)"-->
+<!--                                        class="text-red-600 hover:text-red-800">-->
+<!--                                    ✕-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    }-->
+<!--                <tr class="bg-gray-50">-->
+<!--                    <td colspan="3" class="px-4 py-3 text-sm font-semibold">Total</td>-->
+<!--                    <td colspan="2" class="px-4 py-3 text-sm font-semibold">-->
+<!--                        {{ getCartTotal() | currency }}-->
+<!--                    </td>-->
+<!--                </tr>-->
+<!--                </tbody>-->
+<!--            </table>-->
+
+<!--            &lt;!&ndash; Payment Method Selection &ndash;&gt;-->
+<!--            <div class="mt-4">-->
+<!--                <label class="block text-sm font-medium text-gray-700">Payment Method</label>-->
+<!--                <div class="flex gap-4 mt-1">-->
+<!--                    <label class="inline-flex items-center">-->
+<!--                        <input-->
+<!--                                type="radio"-->
+<!--                                [(ngModel)]="paymentMethod"-->
+<!--                                [value]="'cash'"-->
+<!--                                class="form-radio"-->
+<!--                        >-->
+<!--                        <span class="ml-2">Cash</span>-->
+<!--                    </label>-->
+<!--                    <label class="inline-flex items-center">-->
+<!--                        <input-->
+<!--                                type="radio"-->
+<!--                                [(ngModel)]="paymentMethod"-->
+<!--                                [value]="'credit'"-->
+<!--                                class="form-radio"-->
+<!--                        >-->
+<!--                        <span class="ml-2">Credit</span>-->
+<!--                    </label>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Cart Actions &ndash;&gt;-->
+<!--            <div class="flex gap-2 mt-4">-->
+<!--                <button-->
+<!--                        (click)="completeOrder()"-->
+<!--                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">-->
+<!--                    Complete Order-->
+<!--                </button>-->
+<!--                <button-->
+<!--                        (click)="clearCart()"-->
+<!--                        class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">-->
+<!--                    Cancel-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    }-->
+
+<!--    &lt;!&ndash; Unpaid Orders &ndash;&gt;-->
+<!--    @if (orders.length > 0) {-->
+<!--        <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--            <h2 class="text-lg font-semibold text-gray-800 mb-4">Unpaid Orders</h2>-->
+
+<!--            <table class="w-full min-w-full divide-y divide-gray-200">-->
+<!--                <thead class="bg-gray-50">-->
+<!--                <tr>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order No</th>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>-->
+<!--                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Type</th>-->
+<!--                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Action</th>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody class="bg-white divide-y divide-gray-200">-->
+<!--                    @for (order of orders; track order.orderNo) {-->
+<!--                        <tr>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ order.orderNo }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm">{{ order.amount | currency }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm uppercase">{{ order.paymentMethod }}</td>-->
+<!--                            <td class="px-4 py-3 text-sm">-->
+<!--                                <button-->
+<!--                                        (click)="markOrderAsPaid(order)"-->
+<!--                                        class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">-->
+<!--                                    Mark as Paid-->
+<!--                                </button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    }-->
+<!--                </tbody>-->
+<!--            </table>-->
+<!--        </div>-->
+<!--    }-->
+
+<!--    &lt;!&ndash; Returns Section &ndash;&gt;-->
+<!--    <div class="bg-white rounded-lg shadow-md p-4 mb-6">-->
+<!--        <h2 class="text-lg font-semibold text-gray-800 mb-4">Product Returns</h2>-->
+
+<!--        <form class="space-y-4">-->
+<!--            &lt;!&ndash; Product Selection for Returns &ndash;&gt;-->
+<!--            <div class="relative">-->
+<!--                <select-->
+<!--                        [(ngModel)]="selectedProduct"-->
+<!--                        name="returnProduct"-->
+<!--                        (change)="onProductChange()"-->
+<!--                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">-->
+<!--                    <option value="">Select Product</option>-->
+<!--                    <option *ngFor="let product of products" [value]="product.name">-->
+<!--                        {{ product.name }}-->
+<!--                    </option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</div>-->
+
 <div class="container mx-auto px-4 py-6 max-w-lg">
+    <!-- Route Selection -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <form #saleForm="ngForm" class="space-y-4">
-            <div class="relative">
-                <select
-                        [(ngModel)]="selectedProduct"
-                        name="product"
-                        (change)="onProductChange()"
-                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option value="">Shop 1</option>
-                    <option value="">Shop 2</option>
-                    <option value="">Shop 3</option>
-                </select>
-            </div>
-        </form>
+        <div class="relative">
+            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                <option hidden>Select Route</option>
+                @for (route of routeDTO; track route.id) {
+                    <option [value]="route.id">{{ route.name.toUpperCase() }}</option>
+                } @empty {
+                    <option hidden disabled>No Routes available</option>
+                }
+            </select>
+        </div>
     </div>
 
+    <!-- Shop Selection -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="relative">
+            <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                <option>Select Shop</option>
+                <option>Shop 1</option>
+                <option>Shop 2</option>
+                <option>Shop 3</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- New Sale -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">New Sale</h2>
-        <form (ngSubmit)="addToCart()" #saleForm="ngForm" class="space-y-4">
+        <form class="space-y-4">
             <div class="relative">
-                <select
-                        [(ngModel)]="selectedProduct"
-                        name="product"
-                        (change)="onProductChange()"
-                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option value="">Select Product</option>
-                    <option *ngFor="let product of products" [value]="product.name">
-                        {{ product.name }}
-                    </option>
+                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option hidden="">Select Product</option>
+                    @for (product of productDTO; track product.id) {
+                        <option [value]="product.id">{{ product.name.toUpperCase() }}</option>
+                    } @empty {
+                        <option hidden disabled>No Routes available</option>
+                    }
                 </select>
             </div>
 
             <!-- Size Dropdown -->
-            <div class="relative" *ngIf="selectedProduct">
-                <select
-                        [(ngModel)]="selectedSize"
-                        name="size"
-                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
-                    <option value="">Select Size (kg)</option>
-                    <option *ngFor="let size of getProductSizes()" [value]="size">
-                        {{ size }}kg
-                    </option>
+            <div class="relative">
+                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option>Select Size (kg)</option>
+                    <option>1kg</option>
+                    <option>2kg</option>
+                    <option>3kg</option>
                 </select>
             </div>
 
-            <!-- Quantity Input -->
+            <!-- Quantity & Add to Cart -->
             <div class="flex gap-2">
                 <div class="relative flex-1">
-                    <input
-                            type="number"
-                            [(ngModel)]="quantity"
-                            name="quantity"
-                            min="1"
-                            class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            placeholder="Quantity">
+                    <input type="number" min="1" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Quantity">
                 </div>
-
-                <button
-                        type="submit"
-                        [disabled]="!selectedProduct || !selectedSize || !quantity"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
+                <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2">
                     <span class="hidden sm:inline">Add to Cart</span>
                     <span class="text-xl">+</span>
                 </button>
@@ -68,103 +293,95 @@
     </div>
 
     <!-- Cart Section -->
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6" *ngIf="cart.length > 0">
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Current Order</h2>
+        <table class="w-full min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase"></th>
+            </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+                <td class="px-4 py-3 text-sm">Product 1</td>
+                <td class="px-4 py-3 text-sm">1kg</td>
+                <td class="px-4 py-3 text-sm">1</td>
+                <td class="px-4 py-3 text-sm">$10.00</td>
+                <td class="px-4 py-3 text-sm">
+                    <button class="text-red-600 hover:text-red-800">✕</button>
+                </td>
+            </tr>
+            <tr class="bg-gray-50">
+                <td colspan="3" class="px-4 py-3 text-sm font-semibold">Total</td>
+                <td colspan="2" class="px-4 py-3 text-sm font-semibold">$10.00</td>
+            </tr>
+            </tbody>
+        </table>
 
-        <!-- Cart Items Table -->
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase"></th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                <tr *ngFor="let item of cart">
-                    <td class="px-4 py-3 text-sm">{{ item.product }}</td>
-                    <td class="px-4 py-3 text-sm">{{ item.size }}kg</td>
-                    <td class="px-4 py-3 text-sm">{{ item.quantity }}</td>
-                    <td class="px-4 py-3 text-sm">{{ item.price | currency }}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <button
-                                (click)="removeFromCart(item)"
-                                class="text-red-600 hover:text-red-800">
-                            ✕
-                        </button>
-                    </td>
-                </tr>
-                <tr class="bg-gray-50">
-                    <td colspan="3" class="px-4 py-3 text-sm font-semibold">Total</td>
-                    <td colspan="2" class="px-4 py-3 text-sm font-semibold">
-                        {{ getCartTotal() | currency }}
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <!-- Payment Method Selection -->
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700">Payment Method</label>
+            <div class="flex gap-4 mt-1">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio">
+                    <span class="ml-2">Cash</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio">
+                    <span class="ml-2">Credit</span>
+                </label>
+            </div>
         </div>
 
         <!-- Cart Actions -->
         <div class="flex gap-2 mt-4">
-            <button
-                    (click)="completeOrder()"
-                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                Complete Order
-            </button>
-            <button
-                    (click)="clearCart()"
-                    class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
-                Cancel
-            </button>
+            <button class="button-blue flex-grow">Complete Order</button>
+            <button class="button-red flex-grow">Cancel</button>
         </div>
     </div>
 
-    <!-- Unpaid Orders Section -->
-    <div class="bg-white rounded-lg shadow-md p-4" *ngIf="orders.length > 0">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Unpaid Orders</h2>
-
-        <div class="overflow-x-auto">
-            <table class="w-full min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order No</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Action</th>
-                </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                <tr *ngFor="let order of orders">
-                    <td class="px-4 py-3 text-sm">{{ order.orderNo }}</td>
-                    <td class="px-4 py-3 text-sm">{{ order.amount | currency }}</td>
-                    <td class="px-4 py-3 text-sm">
-                        <button
-                                (click)="markOrderAsPaid(order)"
-                                class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm">
-                            Pay
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div class="container mx-auto px-4 max-w-lg">
+    <!-- Unpaid Orders -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <h6 class="text-sm font-bold pb-4">Unpaid Orders</h6>
-        <table class="table">
-            <thead class="table-thead">
-            <tr class="whitespace-nowrap">
-                <th scope="col" class="px-6 py-3">Order No</th>
-                <th scope="col" class="px-6 py-3">Amount</th>
-                <th scope="col" class="px-6 py-3">Action</th>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Unpaid Orders</h2>
+        <table class="w-full min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order No</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Type</th>
+                <th class="px-4 py-3 text-xs font-medium text-gray-500 uppercase">Action</th>
             </tr>
             </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+                <td class="px-4 py-3 text-sm">001</td>
+                <td class="px-4 py-3 text-sm">$20.00</td>
+                <td class="px-4 py-3 text-sm uppercase">Credit</td>
+                <td class="px-4 py-3 text-sm">
+                    <button class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Mark as Paid</button>
+                </td>
+            </tr>
+            </tbody>
         </table>
     </div>
-</div>
 
+    <!-- Returns Section -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Product Returns</h2>
+        <form class="space-y-4">
+            <!-- Product Selection for Returns -->
+            <div class="relative">
+                <select class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 appearance-none">
+                    <option>Select Product</option>
+                    <option>Product 1</option>
+                    <option>Product 2</option>
+                    <option>Product 3</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>

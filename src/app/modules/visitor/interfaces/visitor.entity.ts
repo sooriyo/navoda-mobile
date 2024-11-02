@@ -1,4 +1,5 @@
 
+
 export interface VisitorSearchResultDTO {
   id?: number
   type: string
