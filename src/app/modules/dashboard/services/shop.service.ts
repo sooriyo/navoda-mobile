@@ -5,7 +5,6 @@ import {BehaviorSubject, tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {Router} from "@angular/router";
 import {ShopDataDTO, ShopDTO} from "../interfaces/shop.entity";
-import {VisitorDTO} from "../interfaces/visitor.entity";
 
 @Injectable({
     providedIn: 'root'
@@ -37,4 +36,5 @@ export class ShopService extends CachedAPIRequest {
                 tap((res) => this.$active.next(res.data)),
             );
     }
+
 }

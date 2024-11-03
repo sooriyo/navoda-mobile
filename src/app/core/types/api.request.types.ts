@@ -5,7 +5,8 @@ export type APIRequestResource =
     APIRequestResources.RouteService |
     APIRequestResources.EmployeeService |
     APIRequestResources.ProductService |
-    APIRequestResources.ShopService
+    APIRequestResources.ShopService |
+    APIRequestResources.OrderService
 
 
 export type APIRequestMethod = 'delete' | 'get' | 'post' | 'put'

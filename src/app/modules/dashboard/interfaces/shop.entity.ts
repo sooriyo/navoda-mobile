@@ -60,3 +60,6 @@ export interface Cart {
     total: number;
     paymentMethod?: 'cash' | 'credit';
 }
+
+
+

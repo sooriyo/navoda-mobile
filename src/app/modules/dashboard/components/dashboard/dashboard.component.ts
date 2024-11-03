@@ -14,6 +14,7 @@ import {
 } from "../../../shared/interface/searchParams.entity";
 import {ShopService} from "../../services/shop.service";
 import {Cart, CartItem, ProductVariantDTO, ShopDataDTO, ShopDTO, ShopProductDTO} from "../../interfaces/shop.entity";
+import {OrderService} from "../../services/order.service";
 
 @Component({
     selector: 'app-dashboard',
@@ -26,6 +27,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly destroy$ = new Subject<void>();
     private readonly routeService = inject(RouteService);
     private readonly shopService = inject(ShopService);
+    private readonly orderService = inject(OrderService);
     private readonly notification = inject(NotificationService);
     private readonly loading = inject(LoadingService);
 
@@ -35,7 +37,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     $$isLoading = signal(false);
     $$selectedProduct = signal<ShopProductDTO | null>(null);
     $$cart = signal<Cart>({ items: [], total: 0 });
-    $$quantity = signal<number>(1);
+    $$quantity = signal<number>(0);
     $$selectedSize = signal<ProductVariantDTO | null>(null);
     $$paymentMethod = signal<'cash' | 'credit' | 'cheque' | 'bill' | null>(null);
 
@@ -313,7 +315,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.$$cart.set({ ...currentCart });
 
             // Reset selections
-            this.$$quantity.set(1);
+            this.$$quantity.set(0);
             this.$$selectedSize.set(null);
             this.$$selectedProduct.set(null);
         }
@@ -351,16 +353,70 @@ export class DashboardComponent implements OnInit, OnDestroy {
             return;
         }
 
-        console.log('Order completed:', {
-            items: this.$$cart().items,
-            total: this.$$cart().total,
-            paymentMethod: this.$$paymentMethod(),
-            shopId: this.$$selectedShop()
-        });
+        const shopId = this.$$selectedShop();
+        if (!shopId) {
+            this.notification.showNotification({
+                type: 'error',
+                message: 'No shop selected',
+                timeout: 4000
+            });
+            return;
+        }
+
+        const orderItems = this.$$cart().items.map(item => ({
+            quantity: item.quantity,
+            productId: item.productId,
+            price: item.price,
+            variantId: item.variantId
+        }));
+
+        const orderPayload = {
+            orderDate: new Date().toISOString().split('T')[0],
+            order_status: '',
+            shopId: shopId,
+            salesRep: 1,
+            createdBy: 1,
+            paymentType: this.$$paymentMethod(),
+            orderItems: orderItems
+        };
+
+        this.loading.setLoading(true);
+
+        this.orderService.orderCreate(orderPayload)
+            .pipe(
+                takeUntil(this.destroy$),
+                finalize(() => this.loading.setLoading(false))
+            )
+            .subscribe({
+                next: (response) => {
+                    this.notification.showNotification({
+                        type: 'success',
+                        message: 'Order created successfully',
+                        timeout: 4000
+                    });
+                    this.cancelOrder();
+                },
+                error: (error) => {
+                    this.notification.showNotification({
+                        type: 'error',
+                        message: error.message || 'Failed to create order',
+                        timeout: 4000
+                    });
+                }
+            });
     }
 
     cancelOrder() {
         this.$$cart.set({ items: [], total: 0 });
         this.$$paymentMethod.set(null);
+    }
+
+
+    async switchRoute() {
+        this.isRouteSelected = true;
+        this.$$selectedShop.set(null);
+        this.$$selectedShop.set(null);
+        this.$$shopData.set(null);
+        this.$$cart.set({ items: [], total: 0 });
     }
 }

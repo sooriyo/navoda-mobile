@@ -22,10 +22,11 @@
 }
 
 
+
 <div class="max-w-6xl mx-auto p-4 space-y-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <div class="relative shop-dropdown-container">
-            <div class="relative">
+        <div class="relative shop-dropdown-container flex gap-4">
+            <div class="relative flex-grow">
                 <div class="relative cursor-pointer" (click)="toggleDropdown($event)">
                     <input type="text"
                            [(ngModel)]="searchText"
@@ -47,7 +48,7 @@
                                   d="M19 9l-7 7-7-7"/>
                         </svg>
                     </div>
-                    <label for="shop" class="label">Shop</label>
+                    <!--                    <label for="shop" class="label">Shop</label>-->
                 </div>
 
                 @if (isListVisible) {
@@ -67,6 +68,16 @@
                     </ul>
                 }
             </div>
+            <div class="relative">
+                <button (click)="switchRoute()"
+                        class="w-full p-2 text-left rounded-lg hover:bg-blue-50 flex items-center gap-2 border border-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                    </svg>
+                    Switch Route
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -75,14 +86,13 @@
 <div class="max-w-6xl mx-auto px-4 space-y-6">
     <div class="bg-white rounded-lg shadow-sm border border-gray-100">
         <div class="p-6">
-            <h2 class="text-xl font-semibold mb-6">Product Selection</h2>
             <div class="space-y-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="relative">
+                <div class="flex  gap-6">
+                    <div class="relative flex-grow w-1/2">
                         <select
                                 (change)="handleProductChange($event)"
                                 [disabled]="!$$shopData() || $$isLoading()"
-                                class="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="textField"
                                 id="types">
                             <option hidden value="">Select product</option>
                             @if ($$isLoading()) {
@@ -90,24 +100,25 @@
                             } @else if ($$shopData()?.products?.length) {
                                 @for (product of $$shopData()?.products; track product.productId) {
                                     <option [value]="product.productId">
-                                        {{ product.productName.toUpperCase() }}
+                                        {{ product.productName }}
                                     </option>
                                 }
                             }
                         </select>
-                        <label for="types"
-                               class="absolute -top-2 left-2 bg-white px-1 text-sm text-gray-600">Product</label>
+                        <!--                        <label for="types" class="absolute -top-2 left-2 bg-white px-1 text-sm text-gray-600">Product</label>-->
                     </div>
 
                     <!-- Size/Variant Selection -->
-                    <div class="relative">
+                    <div class="relative flex-grow w-1/2">
                         <select
                                 (change)="handleVariantChange($event)"
                                 [disabled]="!$$selectedProduct()"
-                                class="w-full h-11 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                id="sizes">
+                                class="textField">
                             <option hidden value="">Select size</option>
                             @if ($$selectedProduct()?.productVariants?.length) {
+                                @if ($$isLoading()) {
+                                    <option disabled>Loading Price...</option>
+                                }
                                 @for (variant of $$selectedProduct()?.productVariants; track variant.productVariantId) {
                                     <option [value]="variant.productVariantId">
                                         {{ variant.weight }}kg - Rs.{{ variant.price }}
@@ -115,14 +126,13 @@
                                 }
                             }
                         </select>
-                        <label for="sizes"
-                               class="absolute -top-2 left-2 bg-white px-1 text-sm text-gray-600">Size</label>
+                        <!--                        <label for="sizes" class="absolute -top-2 left-2 bg-white px-1 text-sm text-gray-600">Size</label>-->
                     </div>
                 </div>
 
                 <!-- Quantity & Add to Cart -->
-                <div class="flex flex-wrap gap-4 items-end">
-                    <div class="relative flex-grow max-w-[200px]">
+                <div class="flex gap-4 items-end">
+                    <div class="relative w-1/2">
                         <input
                                 [value]="$$quantity()"
                                 (change)="handleQuantityChange($event)"
@@ -133,18 +143,19 @@
                                 placeholder=" ">
                         <label class="absolute -top-2 left-2 bg-white px-1 text-sm text-gray-600">Quantity</label>
                     </div>
-
-                    <button
-                            type="button"
-                            [disabled]="!$$selectedSize() || $$quantity() < 1"
-                            (click)="addToCart()"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        Add to Cart
-                    </button>
+                    <div class="relative flex-grow w-1/2 ">
+                        <button
+                                type="button"
+                                [disabled]="!$$selectedSize() || $$quantity() < 1"
+                                (click)="addToCart()"
+                                class="button-blue flex w-full place-content-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -195,7 +206,7 @@
 
         <!-- Payment Method Selection -->
         <div class="p-6 border-t border-gray-200">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-3 sm:grid-cols-3 gap-2">
                 <div class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
                      [class.bg-blue-50]="$$paymentMethod() === 'cash'" (click)="setPaymentMethod('cash')">
                     <input type="radio"
@@ -231,16 +242,16 @@
                     <label for="payment-cheque" class="text-sm font-medium">Cheque</label>
                 </div>
 
-                <div class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                     [class.bg-blue-50]="$$paymentMethod() === 'bill'" (click)="setPaymentMethod('bill')">
-                    <input type="radio"
-                            id="payment-bill"
-                            name="payment-method"
-                            [checked]="$$paymentMethod() === 'bill'"
-                            (change)="setPaymentMethod('bill')"
-                            class="w-4 h-4">
-                    <label for="payment-bill" class="text-sm font-medium">Bill</label>
-                </div>
+                <!--                <div class="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"-->
+                <!--                     [class.bg-blue-50]="$$paymentMethod() === 'bill'" (click)="setPaymentMethod('bill')">-->
+                <!--                    <input type="radio"-->
+                <!--                           id="payment-bill"-->
+                <!--                           name="payment-method"-->
+                <!--                           [checked]="$$paymentMethod() === 'bill'"-->
+                <!--                           (change)="setPaymentMethod('bill')"-->
+                <!--                           class="w-4 h-4">-->
+                <!--                    <label for="payment-bill" class="text-sm font-medium">Bill</label>-->
+                <!--                </div>-->
             </div>
         </div>
 
@@ -265,9 +276,4 @@
     </div>
     <!--    }-->
 </div>
-
-
-
-
-
 
