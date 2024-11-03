@@ -36,8 +36,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     $$selectedProduct = signal<ShopProductDTO | null>(null);
     $$cart = signal<Cart>({ items: [], total: 0 });
     $$quantity = signal<number>(1);
-    $$selectedVariant = signal<ProductVariantDTO | null>(null);
-    $$paymentMethod = signal<'cash' | 'credit' | null>(null);
+    $$selectedSize = signal<ProductVariantDTO | null>(null);
+    $$paymentMethod = signal<'cash' | 'credit' | 'cheque' | 'bill' | null>(null);
 
     selectedRouteName: string | undefined;
     searchText = '';
@@ -265,7 +265,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             const selectedVariant = this.$$selectedProduct()?.productVariants.find(
                 v => v.productVariantId === variantId
             );
-            this.$$selectedVariant.set(selectedVariant || null);
+            this.$$selectedSize.set(selectedVariant || null);
         }
     }
 
@@ -278,7 +278,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     addToCart() {
         const product = this.$$selectedProduct();
-        const variant = this.$$selectedVariant();
+        const variant = this.$$selectedSize();
         const quantity = this.$$quantity();
 
         if (product && variant && quantity > 0) {
@@ -314,7 +314,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
             // Reset selections
             this.$$quantity.set(1);
-            this.$$selectedVariant.set(null);
+            this.$$selectedSize.set(null);
             this.$$selectedProduct.set(null);
         }
     }
@@ -328,7 +328,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.$$cart.set({ ...currentCart });
     }
 
-    setPaymentMethod(method: 'cash' | 'credit') {
+    setPaymentMethod(method: 'cash' | 'credit' | 'cheque' | 'bill') {
         this.$$paymentMethod.set(method);
     }
 
