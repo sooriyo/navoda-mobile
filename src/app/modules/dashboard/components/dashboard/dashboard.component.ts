@@ -32,6 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly loading = inject(LoadingService);
 
     isRouteSelected: boolean = false;
+
     $$selectedShop = signal<number | null>(null);
     $$shopData = signal<ShopDataDTO | null>(null);
     $$isLoading = signal(false);

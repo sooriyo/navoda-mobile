@@ -46,7 +46,7 @@
 
 // Button styles
 %button-base {
-  @apply px-3 py-2.5 text-sm font-medium text-center rounded-lg focus:outline-none focus:ring-4 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply px-3 py-3 text-sm font-medium text-center rounded-lg focus:outline-none focus:ring-4 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 @mixin button-blue {
   @extend %button-base;
