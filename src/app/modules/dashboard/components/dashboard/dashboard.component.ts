@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly orderService = inject(OrderService);
     private readonly notification = inject(NotificationService);
     private readonly loading = inject(LoadingService);
+    private readonly dialog = inject(MatDialog);
 
     isRouteSelected: boolean = false;
 
@@ -41,6 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     $$quantity = signal<number>(0);
     $$selectedSize = signal<ProductVariantDTO | null>(null);
     $$paymentMethod = signal<'cash' | 'credit' | 'cheque' | 'bill' | null>(null);
+    $$isRouteSelected = signal<boolean>(false);
 
     selectedRouteName: string | undefined;
     searchText = '';
@@ -223,8 +225,104 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     async ngOnInit() {
-        this.loadData();
         await this.checkStoredRoute();
+        this.updateShopSearchParams();
+        this.loadData();
+    }
+
+    private updateShopSearchParams() {
+        this.shopSearchParams = {
+            ...this.shopSearchParams,
+            route_name: this.selectedRouteName || ''
+        };
+    }
+
+
+    async checkStoredRoute() {
+        try {
+            const { value } = await Storage.get({ key: 'selectedRouteName' });
+
+            // Update to use signal for route selection
+            this.$$isRouteSelected.set(!!value);
+
+            if (value) {
+                this.selectedRouteName = value;
+                // Update localStorage for consistency
+                localStorage.setItem('selectedRouteName', value);
+            }
+        } catch (error) {
+            console.error('Error checking stored route:', error);
+            this.$$isRouteSelected.set(true);
+        }
+    }
+
+    async onRouteChange(event: Event): Promise<void> {
+        const selectElement = event.target as HTMLSelectElement;
+        const selectedRouteId = selectElement.value;
+        const selectedRoute = this.routeDTO.find(route => route.name === selectedRouteId);
+
+        if (selectedRoute) {
+            // Check if there are items in the cart
+            if (this.$$cart().items.length > 0) {
+                // Open confirmation dialog
+                const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+                    width: '350px',
+                    data: {
+                        title: 'Change Route',
+                        message: 'You have items in your cart. Changing the route will clear your cart. Do you want to proceed?'
+                    }
+                });
+
+                dialogRef.afterClosed().subscribe(async (result) => {
+                    if (result) {
+                        await this.updateRouteAndResetCart(selectedRoute);
+                    }
+                });
+            } else {
+                // If cart is empty, directly update route
+                await this.updateRouteAndResetCart(selectedRoute);
+            }
+        }
+    }
+
+    private async updateRouteAndResetCart(selectedRoute: RouteDTO): Promise<void> {
+        try {
+            // Clear storage
+            await Storage.clear();
+
+            // Set new route in storage
+            await Storage.set({
+                key: 'selectedRouteName',
+                value: selectedRoute.name
+            });
+
+            // Update component state
+            this.selectedRouteName = selectedRoute.name;
+            this.$$isRouteSelected.set(true);
+
+            // Reset component state
+            this.$$selectedShop.set(null);
+            this.$$shopData.set(null);
+            this.$$cart.set({ items: [], total: 0 });
+            this.$$paymentMethod.set(null);
+
+            // Update shop search params
+            this.shopSearchParams = {
+                ...this.shopSearchParams,
+                route_name: this.selectedRouteName || ''
+            };
+
+            // Reload data
+            this.loadData();
+
+        } catch (error) {
+            console.error('Error changing route:', error);
+            this.notification.showNotification({
+                type: 'error',
+                message: 'Failed to change route',
+                timeout: 4000
+            });
+        }
     }
 
     ngOnDestroy(): void {
@@ -233,31 +331,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
         document.removeEventListener('click', this.handleClickOutside);
     }
 
-    // Set Route to capacitor storage and check availability
-    async onRouteChange(event: Event): Promise<void> {
-        const selectElement = event.target as HTMLSelectElement;
-        const selectedRouteId = selectElement.value;
-        const selectedRoute = this.routeDTO.find(route => route.name === selectedRouteId);
-
-        if (selectedRoute) {
-            this.selectedRouteName = selectedRoute.name;
-            try {
-                await Storage.set({
-                    key: 'selectedRouteName',
-                    value: this.selectedRouteName
-                });
-                this.isRouteSelected = false;
-            } catch (error) {
-            }
-        }
-    }
-
-    async checkStoredRoute() {
+    async switchRoute() {
         try {
-            const { value } = await Storage.get({ key: 'selectedRouteName' });
-            this.isRouteSelected = !value;
+            this.$$isRouteSelected.set(false);
+            this.$$selectedShop.set(null);
+            this.$$shopData.set(null);
+            this.$$cart.set({ items: [], total: 0 });
+
+            this.shopSearchParams = {
+                ...this.shopSearchParams,
+                route_name: this.selectedRouteName || ''
+            };
+
+            this.loadData();
+
         } catch (error) {
-            this.isRouteSelected = true;
+            console.error('Error switching route:', error);
         }
     }
 
@@ -413,11 +502,4 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
 
-    async switchRoute() {
-        this.isRouteSelected = true;
-        this.$$selectedShop.set(null);
-        this.$$selectedShop.set(null);
-        this.$$shopData.set(null);
-        this.$$cart.set({ items: [], total: 0 });
-    }
 }
